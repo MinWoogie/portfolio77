@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>최민욱 — 가상자산 전략 기획자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+
+:root {
+  --bg: #0A0A0A;
+  --bg-alt: #111111;
+  --bg-card: #161616;
+  --text-primary: #F0F0F0;
+  --text-secondary: #888888;
+  --accent: #39FF14;
+  --border: #222222;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Pretendard', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── SCROLL PROGRESS ── */
+#scroll-bar {
+  position: fixed; top: 0; left: 0;
+  height: 2px; width: 0%;
+  background: var(--accent);
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor-dot {
+  position: fixed; pointer-events: none; z-index: 9998;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: background 0.2s, transform 0.15s;
+}
+#cursor-ring {
+  position: fixed; pointer-events: none; z-index: 9997;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(57,255,20,0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, background 0.3s, border-color 0.3s;
+}
+body.hovering #cursor-ring {
+  width: 52px; height: 52px;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+body.hovering #cursor-dot {
+  background: #000;
+}
+
+/* ── HERO ── */
+#hero {
+  position: relative;
+  width: 100%; height: 100vh;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 32px 48px;
+  overflow: hidden;
+}
+
+.hero-grid-overlay {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(57,255,20,0.03) 80px),
+    repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(57,255,20,0.03) 80px);
+  pointer-events: none;
+}
+
+.hero-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  position: relative; z-index: 2;
+}
+.hero-job-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--accent); text-transform: uppercase;
+  opacity: 0; transform: translateY(20px);
+}
+.hero-year {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+.hero-name-wrap {
+  position: absolute;
+  top: 50%; left: 48px;
+  transform: translateY(-52%);
+  z-index: 2;
+  line-height: 0.88;
+}
+.hero-name-line {
+  display: block;
+  font-size: clamp(80px, 11vw, 140px);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: var(--text-primary);
+  clip-path: inset(0 0 100% 0);
+  will-change: clip-path;
+}
+.hero-name-line.accent { color: var(--accent); }
+
+.hero-bottom {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  position: relative; z-index: 2;
+}
+.hero-bio {
+  font-size: 14px; font-weight: 400; line-height: 1.7;
+  color: var(--text-secondary); max-width: 380px;
+}
+.hero-scroll {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--text-secondary); text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.hero-scroll::after {
+  content: '↓';
+  display: inline-block;
+  animation: bounce 1.6s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* ── MARQUEE ── */
+.marquee-wrap {
+  overflow: hidden;
+  background: var(--accent);
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+  padding: 14px 0;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-flex; gap: 0;
+  animation: marquee 28s linear infinite;
+}
+.marquee-item {
+  font-size: 13px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: #000; padding: 0 28px;
+}
+.marquee-sep { color: #000; font-size: 11px; padding: 0 4px; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ── SECTION COMMON ── */
+section {
+  padding: 120px 48px;
+  border-top: 1px solid var(--border);
+}
+.section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--accent); text-transform: uppercase;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--border);
+}
+.section-display {
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 900; line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  word-spacing: 0.08em;
+  opacity: 0; transform: translateY(60px);
+}
+
+/* ── 01 ABOUT ── */
+#about .about-grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: 80px; margin-top: 64px;
+  align-items: start;
+}
+.about-left blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 24px;
+  font-size: 18px; font-weight: 600; line-height: 1.7;
+  color: var(--text-primary); margin-bottom: 40px;
+  opacity: 0; transform: translateY(30px);
+}
+.about-left p {
+  font-size: 16px; line-height: 1.9;
+  color: var(--text-secondary);
+  opacity: 0; transform: translateY(30px);
+}
+.strength-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.strength-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  opacity: 0; transform: translateY(30px);
+  transition: border-color 0.3s;
+}
+.strength-card:hover { border-color: var(--accent); cursor: none; }
+.strength-num {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.12em; margin-bottom: 16px;
+}
+.strength-title {
+  font-size: 17px; font-weight: 700; margin-bottom: 10px;
+  color: var(--text-primary);
+}
+.strength-desc {
+  font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+}
+
+/* ── 02 WORKS ── */
+#works .works-list { margin-top: 64px; }
+.work-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 40px; align-items: center;
+  padding: 36px 0;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  cursor: none;
+  opacity: 0; transform: translateX(-20px);
+}
+.work-row::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.76,0,0.24,1);
+  z-index: 0;
+}
+.work-row:hover::before { transform: scaleX(1); }
+.work-row > * { position: relative; z-index: 1; transition: color 0.3s; }
+.work-row:hover .work-company,
+.work-row:hover .work-role,
+.work-row:hover .work-tags span,
+.work-row:hover .work-period { color: #000 !important; }
+.work-company {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+}
+.work-role {
+  font-size: 22px; font-weight: 800; color: var(--text-primary);
+  margin-top: 4px;
+}
+.work-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.work-tags span {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+  color: var(--text-secondary); text-transform: uppercase;
+}
+.work-period {
+  font-size: 13px; color: var(--text-secondary);
+  white-space: nowrap; text-align: right;
+}
+
+/* KPI BLOCK */
+.kpi-block {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 80px;
+  border: 1px solid var(--border);
+}
+.kpi-item {
+  padding: 48px 40px;
+  border-right: 1px solid var(--border);
+  opacity: 0; transform: translateY(30px);
+}
+.kpi-item:last-child { border-right: none; }
+.kpi-num {
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 900; color: var(--accent);
+  line-height: 1; letter-spacing: -0.04em;
+}
+.kpi-num sup { font-size: 0.45em; vertical-align: super; }
+.kpi-label {
+  font-size: 14px; color: var(--text-secondary);
+  margin-top: 12px; line-height: 1.6;
+}
+
+/* ── 03 EXPERIENCE ── */
+#experience .exp-list { margin-top: 64px; }
+.exp-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 40px;
+  padding: 40px 0;
+  border-bottom: 1px solid var(--border);
+  opacity: 0; transform: translateY(20px);
+}
+.exp-period {
+  font-size: 12px; font-weight: 600;
+  color: var(--text-secondary); line-height: 1.6;
+  padding-top: 4px;
+}
+.exp-duration {
+  font-size: 11px; color: var(--accent);
+  margin-top: 6px; font-weight: 700;
+}
+.exp-company {
+  font-size: 20px; font-weight: 800;
+  color: var(--text-primary); margin-bottom: 4px;
+}
+.exp-role {
+  font-size: 13px; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.exp-bullets {
+  list-style: none; display: flex; flex-direction: column; gap: 8px;
+}
+.exp-bullets li {
+  font-size: 15px; color: var(--text-secondary);
+  line-height: 1.7; padding-left: 18px;
+  position: relative;
+}
+.exp-bullets li::before {
+  content: '—';
+  position: absolute; left: 0;
+  color: var(--accent); font-size: 12px;
+}
+.exp-skills {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;
+}
+.exp-skills span {
+  font-size: 11px; font-weight: 700;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  color: var(--text-secondary); letter-spacing: 0.06em;
+}
+
+.edu-section { margin-top: 80px; }
+.edu-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--accent); text-transform: uppercase;
+  margin-bottom: 32px; display: flex; align-items: center; gap: 12px;
+}
+.edu-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── CERT SECTION ── */
+#certs {
+  padding: 80px 48px;
+  background: var(--bg-alt);
+}
+.cert-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  margin-top: 40px;
+}
+.cert-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 28px 24px;
+  opacity: 0; transform: translateY(30px);
+  transition: border-color 0.3s;
+}
+.cert-card:hover { border-color: var(--accent); }
+.cert-year {
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.1em; margin-bottom: 10px;
+}
+.cert-name {
+  font-size: 15px; font-weight: 700; color: var(--text-primary);
+  line-height: 1.4; margin-bottom: 8px;
+}
+.cert-org {
+  font-size: 12px; color: var(--text-secondary);
+}
+
+/* ── 04 CONTACT ── */
+#contact {
+  padding: 140px 48px;
+  text-align: left;
+}
+.contact-display {
+  font-size: clamp(80px, 12vw, 160px);
+  font-weight: 900; line-height: 0.88;
+  letter-spacing: -0.05em;
+  margin-bottom: 60px;
+}
+.contact-display span { display: block; }
+.contact-display .talk { color: var(--accent); }
+.contact-cta-wrap {
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+}
+.contact-cta {
+  display: inline-block;
+  font-size: 16px; font-weight: 700;
+  color: #000; background: var(--accent);
+  padding: 18px 40px;
+  letter-spacing: 0.05em;
+  text-decoration: none; cursor: none;
+  transition: background 0.3s, color 0.3s;
+  position: relative; overflow: hidden;
+}
+.contact-cta:hover { background: #fff; }
+.contact-info {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.9;
+}
+.contact-info a {
+  color: var(--text-secondary); text-decoration: none;
+  transition: color 0.2s;
+}
+.contact-info a:hover { color: var(--accent); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 48px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-name {
+  font-size: 12px; font-weight: 700; color: var(--text-secondary);
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.footer-copy {
+  font-size: 12px; color: var(--text-secondary);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  #hero { padding: 24px; }
+  .hero-name-wrap { left: 24px; }
+  .hero-name-line { font-size: clamp(52px, 14vw, 80px); }
+  section { padding: 80px 24px; }
+  #about .about-grid { grid-template-columns: 1fr; gap: 48px; }
+  .strength-grid { grid-template-columns: 1fr; }
+  .work-row { grid-template-columns: 1fr; gap: 12px; }
+  .kpi-block { grid-template-columns: 1fr; }
+  .kpi-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .exp-row { grid-template-columns: 1fr; gap: 16px; }
+  .cert-grid { grid-template-columns: 1fr 1fr; }
+  #contact { padding: 80px 24px; }
+  footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  #certs { padding: 80px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-bar"></div>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section id="hero">
+  <div class="hero-grid-overlay"></div>
+
+  <div class="hero-top">
+    <div class="hero-job-title">서비스 기획 · 전략 PM · UX 디렉터</div>
+    <div class="hero-year">2026</div>
+  </div>
+
+  <div class="hero-name-wrap">
+    <span class="hero-name-line">최</span>
+    <span class="hero-name-line">민</span>
+    <span class="hero-name-line accent">욱.</span>
+  </div>
+
+  <div class="hero-bottom">
+    <p class="hero-bio">13년의 실무 구력과 UX 혁신으로<br>마케팅 없이 신규 유입 60% 상승을 이끌어낸<br>가상자산 시장의 전략 기획자.</p>
+    <div class="hero-scroll">Scroll</div>
+  </div>
+</section>
+
+<!-- ═══════════ MARQUEE ═══════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-track" id="marquee-track"></div>
+</div>
+
+<!-- ═══════════ 01 ABOUT ═══════════ -->
+<section id="about">
+  <div class="section-label">01 — About</div>
+  <div class="section-display">ABOUT<br>ME.</div>
+
+  <div class="about-grid">
+    <div class="about-left">
+      <blockquote>
+        "실무의 디테일을 놓치지 않으면서도<br>거시적인 전략을 제시하는 기획자"
+      </blockquote>
+      <p>
+        루이비통코리아의 브랜드 감각, 위메프의 커머스 기획, 미래에셋의 팀 리더십, 그리고 8년간 가상자산·핀테크 최전선의 전문성까지. 다각도의 경험이 만들어낸 전략 기획자입니다.<br><br>
+        기획자와 개발자 사이의 간극을 줄이기 위해 프론트엔드 개발을 독학했으며, 코인 입출금 로직부터 시세 모니터링 시스템까지 기술적 이해를 바탕으로 한 기획을 수행합니다.
+      </p>
+    </div>
+
+    <div class="strength-grid">
+      <div class="strength-card">
+        <div class="strength-num">01</div>
+        <div class="strength-title">데이터 기반 UX 혁신</div>
+        <div class="strength-desc">CoinRF 웹 리뉴얼을 통해 마케팅 비용 없이 신규 회원 유입 60%↑, 거래량 50%↑ 달성. 수치로 증명하는 기획력.</div>
+      </div>
+      <div class="strength-card">
+        <div class="strength-num">02</div>
+        <div class="strength-title">가상자산 전문성</div>
+        <div class="strength-desc">업비트 CS부터 해외 거래소 초기 셋업, 백오피스 기획까지 핀테크 서비스의 전 사이클 경험 보유.</div>
+      </div>
+      <div class="strength-card">
+        <div class="strength-num">03</div>
+        <div class="strength-title">검증된 팀 리더십</div>
+        <div class="strength-desc">미래에셋 팀장 → TFT 팀장 → 개발기획팀 과장까지. 복잡한 이해관계자 커뮤니케이션 조율 능력.</div>
+      </div>
+      <div class="strength-card">
+        <div class="strength-num">04</div>
+        <div class="strength-title">크로스 인더스트리 감각</div>
+        <div class="strength-desc">럭셔리 VMD · 커머스 MD · 금융 영업 · 핀테크 기획. 업종을 넘나드는 비즈니스 감각과 시장 통찰.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 02 WORKS ═══════════ -->
+<section id="works">
+  <div class="section-label">02 — Works</div>
+  <div class="section-display">KEY<br>WORKS.</div>
+
+  <div class="works-list">
+    <div class="work-row">
+      <div>
+        <div class="work-company">테라팜코리아(주)</div>
+        <div class="work-role">CoinRF 거래소 웹 리뉴얼 기획</div>
+        <div class="work-tags">
+          <span>UX 리뉴얼</span><span>·</span>
+          <span>서비스기획</span><span>·</span>
+          <span>스토리보드</span>
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;">
+        복잡한 액션 플로우와 낮은 가독성으로 인한 이탈 문제를 발견, 인터페이스 전면 재설계. 불필요한 단계 삭제 및 거래 직관성 강화를 통해 별도 마케팅 없이 신규 유입률 최고 60% 끌어올림.
+      </div>
+      <div class="work-period">2022.11<br>→ 2026.01</div>
+    </div>
+
+    <div class="work-row">
+      <div>
+        <div class="work-company">(주)밸류비</div>
+        <div class="work-role">bispex 해외 거래소 초기 셋업</div>
+        <div class="work-tags">
+          <span>TFT 리더</span><span>·</span>
+          <span>서비스기획</span><span>·</span>
+          <span>시세 모니터링</span>
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;">
+        해외 암호화폐 거래소 bispex의 초기 셋업 및 기획 전반 참여. 타 거래소 시세·호가 모니터링 시스템 설계 및 테스트. TFT 팀장으로 프로젝트 리딩.
+      </div>
+      <div class="work-period">2019.11<br>→ 2021.01</div>
+    </div>
+
+    <div class="work-row">
+      <div>
+        <div class="work-company">브랜드아카이브</div>
+        <div class="work-role">암호화폐 브랜드 마케팅 전략</div>
+        <div class="work-tags">
+          <span>광고기획</span><span>·</span>
+          <span>바이럴</span><span>·</span>
+          <span>키워드광고</span>
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;">
+        특정 코인·암호화폐 대상 유튜브 콘텐츠 및 커뮤니티 기반 브랜딩 전략 수립. 바이럴 마케팅·키워드 광고로 인지도 확대 및 투자자 유입 달성.
+      </div>
+      <div class="work-period">2022.04<br>→ 2022.07</div>
+    </div>
+
+    <div class="work-row">
+      <div>
+        <div class="work-company">두나무씨엑스</div>
+        <div class="work-role">업비트 · 카카오스탁 운영 관리</div>
+        <div class="work-tags">
+          <span>CS운영</span><span>·</span>
+          <span>기술지원</span><span>·</span>
+          <span>QA</span>
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:1.8;">
+        국내 최대 가상자산 거래소 업비트 CS 운영 및 카카오스탁 앱 내 기술지원·운영관리. 유저 페인포인트 직접 해결하며 서비스 기획으로의 전환점 마련.
+      </div>
+      <div class="work-period">2018.01<br>→ 2019.02</div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-block">
+    <div class="kpi-item">
+      <div class="kpi-num"><span class="kpi-count" data-target="60">0</span><sup>%</sup></div>
+      <div class="kpi-label">마케팅 없이 달성한<br>신규 회원 유입률 상승</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-num"><span class="kpi-count" data-target="50">0</span><sup>%</sup></div>
+      <div class="kpi-label">CoinRF 리뉴얼 후<br>거래량 증가율</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-num"><span class="kpi-count" data-target="13">0</span><sup>년</sup></div>
+      <div class="kpi-label">유통·금융·핀테크를 넘나든<br>누적 실무 경력</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 03 EXPERIENCE ═══════════ -->
+<section id="experience">
+  <div class="section-label">03 — Experience</div>
+  <div class="section-display">EXPE<br>RIENCE.</div>
+
+  <div class="exp-list">
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2022. 11 — 2026. 01</div>
+        <div class="exp-duration">3년 3개월</div>
+      </div>
+      <div>
+        <div class="exp-company">테라팜코리아(주)</div>
+        <div class="exp-role">개발기획팀 과장 · 팀장</div>
+        <ul class="exp-bullets">
+          <li>암호화폐 거래소 웹 페이지 전반 기획 총괄 및 팀원 관리</li>
+          <li>파트너사 커뮤니케이션 및 프로젝트 PM 역할 수행</li>
+          <li>스토리보드 작성, 서비스·콘텐츠·UI/UX 기획 주도</li>
+          <li>CoinRF 리뉴얼로 신규 유입 60%↑, 거래량 50%↑ 달성</li>
+        </ul>
+        <div class="exp-skills">
+          <span>스토리보드</span><span>서비스기획</span><span>UI/UX기획</span><span>팀관리</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2022. 04 — 2022. 07</div>
+        <div class="exp-duration">4개월</div>
+      </div>
+      <div>
+        <div class="exp-company">브랜드아카이브</div>
+        <div class="exp-role">전략기획팀 대리 · 매니저</div>
+        <ul class="exp-bullets">
+          <li>특정 코인/암호화폐 대상 유튜브 콘텐츠 기획 및 제작</li>
+          <li>각종 커뮤니티 기반 브랜딩 및 광고 마케팅 전략 수립</li>
+          <li>바이럴 마케팅, 키워드 광고 집행</li>
+        </ul>
+        <div class="exp-skills">
+          <span>광고기획</span><span>바이럴마케팅</span><span>키워드광고</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2019. 11 — 2021. 01</div>
+        <div class="exp-duration">1년 3개월</div>
+      </div>
+      <div>
+        <div class="exp-company">(주)밸류비</div>
+        <div class="exp-role">Task Force Team 팀장</div>
+        <ul class="exp-bullets">
+          <li>해외 암호화폐 거래소 bispex 초기 셋업 및 전반 기획 참여</li>
+          <li>타 거래소와의 시세·호가 모니터링 시스템 설계 및 테스트</li>
+          <li>TFT 팀장으로 프로젝트 전 과정 리딩</li>
+        </ul>
+        <div class="exp-skills">
+          <span>서비스기획</span><span>콘텐츠기획</span><span>시세모니터링</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2019. 03 — 2019. 10</div>
+        <div class="exp-duration">8개월</div>
+      </div>
+      <div>
+        <div class="exp-company">㈜엑시아소프트</div>
+        <div class="exp-role">운영/시세팀 주임 · 팀장</div>
+        <ul class="exp-bullets">
+          <li>회원 코인 입출금 가능 여부 확인 및 처리, OTP 해제·로그인 차단 해제</li>
+          <li>자사·타사 거래소 시세 호가 모니터링 업무</li>
+          <li>메일 인입 CS 업무 처리 및 팀 운영</li>
+        </ul>
+        <div class="exp-skills">
+          <span>전략</span><span>운영관리</span><span>CS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2018. 01 — 2019. 02</div>
+        <div class="exp-duration">1년 2개월</div>
+      </div>
+      <div>
+        <div class="exp-company">두나무씨엑스</div>
+        <div class="exp-role">업비트 · 카카오스탁 주임</div>
+        <ul class="exp-bullets">
+          <li>국내 최대 거래소 업비트 CS 운영 (2018.01~05)</li>
+          <li>카카오스탁 CS 및 앱 내 기술지원·운영관리 (2018.05~2019.02)</li>
+          <li>고객 문의 분석, 콜센터 운영, QA 수행</li>
+        </ul>
+        <div class="exp-skills">
+          <span>고객문의분석</span><span>콜센터운영</span><span>QA</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2015. 11 — 2017. 12</div>
+        <div class="exp-duration">2년 2개월</div>
+      </div>
+      <div>
+        <div class="exp-company">미래에셋생명보험</div>
+        <div class="exp-role">강남TFC 3실 팀장</div>
+        <ul class="exp-bullets">
+          <li>보험 영업 및 팀 내 사원 관리·육성</li>
+          <li>재무 상담 및 증권 관련 금융 영업</li>
+        </ul>
+        <div class="exp-skills">
+          <span>금융영업</span><span>팀관리</span><span>재무상담</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2013. 01 — 2015. 10</div>
+        <div class="exp-duration">2년 10개월</div>
+      </div>
+      <div>
+        <div class="exp-company">위메프</div>
+        <div class="exp-role">상품기획실 파트장</div>
+        <ul class="exp-bullets">
+          <li>상품 기획 및 입점, 파트 내 인원 관리</li>
+          <li>온라인 MD, 재고 관리, 패션 MD 운영</li>
+        </ul>
+        <div class="exp-skills">
+          <span>상품기획</span><span>온라인MD</span><span>재고관리</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-row">
+      <div>
+        <div class="exp-period">2011. 09 — 2013. 01</div>
+        <div class="exp-duration">1년 5개월</div>
+      </div>
+      <div>
+        <div class="exp-company">루이비통코리아</div>
+        <div class="exp-role">VMD팀 주임</div>
+        <ul class="exp-bullets">
+          <li>로컬 매장 디스플레이 및 컨셉 관리</li>
+          <li>럭셔리 브랜드 가치 이해 및 공간 디자인</li>
+        </ul>
+        <div class="exp-skills">
+          <span>공간디자인</span><span>VMD</span><span>브랜드관리</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="edu-section">
+    <div class="edu-label">Education</div>
+    <div class="exp-row" style="opacity:1;transform:none;">
+      <div>
+        <div class="exp-period">2008. 03 — 2011. 08</div>
+        <div class="exp-duration">중퇴</div>
+      </div>
+      <div>
+        <div class="exp-company">한국교통대학교</div>
+        <div class="exp-role">전기공학과 · 학점 3.9 / 4.5</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ CERTS ═══════════ -->
+<section id="certs">
+  <div class="section-label">Certifications</div>
+  <div class="cert-grid">
+    <div class="cert-card">
+      <div class="cert-year">2024. 01</div>
+      <div class="cert-name">코딩지도사</div>
+      <div class="cert-org">1급 자격증 과정 · 한국교육검정원</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-year">2024. 01</div>
+      <div class="cert-name">빅데이터 전문가</div>
+      <div class="cert-org">단일자격증 과정 · 한국교육검정원</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-year">2024. 01</div>
+      <div class="cert-name">정보보호관리사</div>
+      <div class="cert-org">단일자격증 과정 · 한국교육검정원</div>
+    </div>
+    <div class="cert-card">
+      <div class="cert-year">2024. 01</div>
+      <div class="cert-name">마케팅기획 전문가</div>
+      <div class="cert-org">단일자격증 과정 · 한국교육검정원</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 04 CONTACT ═══════════ -->
+<section id="contact">
+  <div class="section-label">04 — Contact</div>
+  <div class="contact-display">
+    <span>LET'S</span>
+    <span class="talk">TALK.</span>
+  </div>
+  <div class="contact-cta-wrap">
+    <a class="contact-cta" id="cta-btn" href="mailto:choiminwook89@gmail.com">
+      choiminwook89@gmail.com →
+    </a>
+    <div class="contact-info">
+      <div>📞 010-3276-2546</div>
+      <div>📍 서울 서초구 반포동</div>
+      <div>희망 직무: 서비스기획 · PM · UI/UX기획</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-name">CHOI MINWOOK — PORTFOLIO 2026</div>
+  <div class="footer-copy">가상자산 시장의 성장을 설계하는 전략가</div>
+</footer>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ── MARQUEE CONTENT ──
+const skills = ['서비스기획','UX전략','스토리보드','가상자산','PM·PO','UI기획','콘텐츠기획','팀리딩'];
+const track = document.getElementById('marquee-track');
+let html = '';
+for(let i=0;i<4;i++){
+  skills.forEach(s=>{
+    html+=`<span class="marquee-item">${s}</span><span class="marquee-sep">✦</span>`;
+  });
+}
+track.innerHTML = html;
+
+// ── CUSTOM CURSOR ──
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function lerp(){
+  rx+=(mx-rx)*0.08; ry+=(my-ry)*0.08;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(lerp);
+})();
+document.querySelectorAll('a,button,.work-row,.strength-card,.cert-card,.contact-cta').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+
+// ── SCROLL PROGRESS ──
+window.addEventListener('scroll',()=>{
+  const pct=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  document.getElementById('scroll-bar').style.width=pct+'%';
+});
+
+// ── HERO ANIMATION ──
+const lines = document.querySelectorAll('.hero-name-line');
+gsap.to(lines,{
+  clipPath:'inset(0 0 0% 0)',
+  duration:1.1,
+  ease:'power4.out',
+  stagger:0.18,
+  delay:0.2
+});
+gsap.to('.hero-job-title',{
+  y:0, opacity:1, duration:0.8, ease:'power3.out', delay:0.9
+});
+
+// ── SCROLL TRIGGERS ──
+gsap.utils.toArray('.section-display').forEach(el=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:1.0,ease:'power3.out',
+    scrollTrigger:{trigger:el,start:'top 85%'}
+  });
+});
+gsap.utils.toArray('.about-left blockquote, .about-left p').forEach((el,i)=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:0.8,ease:'power3.out',delay:i*0.15,
+    scrollTrigger:{trigger:el,start:'top 85%'}
+  });
+});
+gsap.utils.toArray('.strength-card').forEach((el,i)=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:0.7,ease:'power3.out',delay:i*0.1,
+    scrollTrigger:{trigger:el,start:'top 90%'}
+  });
+});
+gsap.utils.toArray('.work-row').forEach((el,i)=>{
+  gsap.to(el,{
+    x:0,opacity:1,duration:0.7,ease:'power3.out',delay:i*0.07,
+    scrollTrigger:{trigger:el,start:'top 88%'}
+  });
+});
+gsap.utils.toArray('.kpi-item').forEach((el,i)=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:0.7,ease:'power3.out',delay:i*0.1,
+    scrollTrigger:{trigger:el,start:'top 88%'}
+  });
+});
+gsap.utils.toArray('.exp-row').forEach((el,i)=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:0.7,ease:'power3.out',delay:i*0.1,
+    scrollTrigger:{trigger:el,start:'top 88%'}
+  });
+});
+gsap.utils.toArray('.cert-card').forEach((el,i)=>{
+  gsap.to(el,{
+    y:0,opacity:1,duration:0.6,ease:'power3.out',delay:i*0.08,
+    scrollTrigger:{trigger:el,start:'top 88%'}
+  });
+});
+
+// ── KPI COUNT UP ──
+document.querySelectorAll('.kpi-count').forEach(el=>{
+  const target=+el.dataset.target;
+  let triggered=false;
+  ScrollTrigger.create({
+    trigger:el, start:'top 85%',
+    onEnter:()=>{
+      if(triggered)return; triggered=true;
+      let cur=0; const dur=2000; const step=dur/60;
+      const inc=target/(dur/step);
+      const t=setInterval(()=>{
+        cur+=inc;
+        if(cur>=target){cur=target;clearInterval(t);}
+        el.textContent=Math.floor(cur);
+      },step);
+    }
+  });
+});
+
+// ── MAGNETIC CTA ──
+const cta = document.getElementById('cta-btn');
+if(cta){
+  cta.addEventListener('mousemove',e=>{
+    const r=cta.getBoundingClientRect();
+    const cx=r.left+r.width/2, cy=r.top+r.height/2;
+    const dx=e.clientX-cx, dy=e.clientY-cy;
+    cta.style.transform=`translate(${dx*0.25}px,${dy*0.25}px)`;
+  });
+  cta.addEventListener('mouseleave',()=>{
+    cta.style.transform='translate(0,0)';
+    cta.style.transition='transform 0.5s cubic-bezier(0.23,1,0.32,1)';
+    setTimeout(()=>cta.style.transition='',500);
+  });
+}
+</script>
+</body>
+</html>
